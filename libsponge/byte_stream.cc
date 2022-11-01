@@ -33,10 +33,8 @@ size_t ByteStream::write(const string &data) {
 
 //! \param[in] len bytes will be copied from the output side of the buffer
 string ByteStream::peek_output(const size_t len) const {
-    // DUMMY_CODE(len);
     size_t strlen = min(len, buffer_size());
     string res = "";
-    // cout << strlen << " " << buffer_size() << endl;
     size_t i = _tail;
     while (strlen--){
         res += _buffer[i++];
