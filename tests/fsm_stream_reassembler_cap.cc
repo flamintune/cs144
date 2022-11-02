@@ -60,9 +60,9 @@ int main() {
             ReassemblerTestHarness test{1};
 
             test.execute(SubmitSegment{"ab", 0});
-            test.execute(BytesAssembled(1));
+            test.execute(BytesAssembled(1)); // byte written = 1
 
-            test.execute(SubmitSegment{"ab", 0});
+            test.execute(SubmitSegment{"ab", 0}); // 相当于重发
             test.execute(BytesAssembled(1));
 
             test.execute(BytesAvailable("a"));
