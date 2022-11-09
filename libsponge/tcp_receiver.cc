@@ -20,17 +20,31 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
         通过报文中的 seqno 来确定
     */ 
     if (seg.header().syn == 1){ // then set isn   
-        auto rd = get_random_generator();    
-        uniform_int_distribution<uint32_t> dist32{0, numeric_limits<uint32_t>::max()};
-        const WrappingInt32 isn{dist32(rd)};
-        _isn = isn;
+        _isn = seg.header().seqno; // 因为 seqno 就是 一个 WrapppingInt32
+        _syn = 1;
     }
+    if (_syn == 0)
+        return;
     string data = seg.payload().copy(); // 是否需要判断 capacity
     // if (data.size() > _capacity) 无需处理，push里面会丢弃多的部分
-        
-    _reassembler.push_substring(data,unwrap(seg.header().seqno,_isn,_checkpoint),seg.header().fin);
+    uint64_t absolute_ackno = unwrap(seg.header().seqno,_isn,_reassembler.stream_out().bytes_written() + 1) - 1 + seg.header().syn;
+    
+    _reassembler.push_substring(data,absolute_ackno,seg.header().fin);
+    // if (seg.header().fin == 1){
+    //     _reassembler.stream_out().input_ended(); 不用调因为在 push 里面判断了的
+    // }
 }
-// 返回接受方想要接受的第一个字节
-optional<WrappingInt32> TCPReceiver::ackno() const { return _reassembler._curIndex; }
+// 返回接受方想要接受的第一个字节 通过 byteWriten来完成 curIndex为什么不能通过这个来完成？
+optional<WrappingInt32> TCPReceiver::ackno() const {
+    if (_syn){
+        uint64_t absolute_ackno = _reassembler.stream_out().bytes_written();
+        if (_reassembler.stream_out().input_ended())
+            return wrap(absolute_ackno+2,_isn);
+        else
+            return wrap(absolute_ackno+1,_isn);
+    }
+    else
+        return nullopt;
+}
 
-size_t TCPReceiver::window_size() const { return _reassembler.stream_out()._remain_capacity; }
+size_t TCPReceiver::window_size() const { return _capacity - _reassembler.stream_out().buffer_size(); }

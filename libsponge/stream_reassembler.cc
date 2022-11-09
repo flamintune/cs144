@@ -67,7 +67,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         }
     }
     while(_check[last % _capacity] && _count < _unassembled_bytes){
-        ++_count;
+        ++_count; 
         ++last;
     }
     // cout << "lastasm index:" << _last_assembled_index << " curIndex:" << _curIndex << " index:" << index << " count:" << _count << " data:" << data << endl;
@@ -95,3 +95,5 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
 size_t StreamReassembler::unassembled_bytes() const { return _unassembled_bytes; }
 
 bool StreamReassembler::empty() const { return _unassembled_bytes == 0; }
+
+size_t StreamReassembler::curIndex() const { return _curIndex; }
