@@ -32,7 +32,8 @@ WrappingInt32 wrap(uint64_t n, WrappingInt32 isn);
 //! \note Each of the two streams of the TCP connection has its own ISN. One stream
 //! runs from the local TCPSender to the remote TCPReceiver and has one ISN,
 //! and the other stream runs from the remote TCPSender to the local TCPReceiver and
-//! has a different ISN.
+//! has a different ISN. check point 的作用！
+//? 比iru n = 17 isn = 0 ==> absolute seqno = 17 || 2>>32 + 17 || 2 >> 33 + 17 ...
 uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint);
 
 //! \name Helper functions

@@ -14,7 +14,7 @@ class StreamReassembler {
     // Your code here -- add private members as necessary.
     std::vector<char> _auxiliary;//? 选择一个数据结构来当 辅助存储 很显然是不能用 byteStream的
     std::vector<bool> _check; //? check 是否有东西
-    size_t _curIndex;
+    size_t _curIndex; // ackno
     size_t _count;
     size_t _unassembled_bytes;
     ByteStream _output;  //!< The reassembled in-order byte stream
