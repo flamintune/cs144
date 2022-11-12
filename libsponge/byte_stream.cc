@@ -1,5 +1,5 @@
 #include "byte_stream.hh"
-
+#include <iostream>
 // Dummy implementation of a flow-controlled in-memory byte stream.
 
 // For Lab 0, please replace with a real implementation that passes the
@@ -48,7 +48,8 @@ string ByteStream::peek_output(const size_t len) const {
 void ByteStream::pop_output(const size_t len) { 
     // DUMMY_CODE(len);
     size_t strlen = min(len,buffer_size()); 
-    this->_tail += len;
+    _tail += strlen;
+    // tail ---------------- head
     if (_tail >= _capacity)
         _tail -= _capacity;
     _read_size += strlen;
@@ -62,6 +63,7 @@ std::string ByteStream::read(const size_t len) {
     // DUMMY_CODE(len);
     string res = peek_output(len);
     pop_output(len);
+    
     return res;
 }
 

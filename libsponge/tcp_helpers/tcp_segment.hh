@@ -11,7 +11,6 @@ class TCPSegment {
   private:
     TCPHeader _header{};
     Buffer _payload{};
-
   public:
     //! \brief Parse the segment from a string
     ParseResult parse(const Buffer buffer, const uint32_t datagram_layer_checksum = 0);
