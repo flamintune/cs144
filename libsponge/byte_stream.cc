@@ -1,5 +1,5 @@
 #include "byte_stream.hh"
-#include <iostream>
+
 // Dummy implementation of a flow-controlled in-memory byte stream.
 
 // For Lab 0, please replace with a real implementation that passes the
@@ -8,77 +8,58 @@
 // You will need to add private members to the class declaration in `byte_stream.hh`
 
 template <typename... Targs>
-void DUMMY_CODE(Targs &&... /* unused */) {}
+void DUMMY_CODE(Targs &&.../* unused */) {}
 
 using namespace std;
 
 ByteStream::ByteStream(const size_t capacity)
-    : _capacity(capacity),_head(0),_tail(0),_buffer(),_written_size(0),_read_size(0),_remain_capacity(capacity),_end_input(false),_empty(true),_error(false) {}
+    : _queue(), _capacity_size(capacity), _written_size(0), _read_size(0), _end_input(false), _error(false) {}
 
 size_t ByteStream::write(const string &data) {
-    // DUMMY_CODE(data);
-    // 1.judge is full
     if (_end_input)
         return 0;
-    size_t strlen = min(data.length(),_remain_capacity);
-    for (size_t i = 0;i < strlen;++ i){
-        _buffer[_head++] = data[i];
-        if (_head >= _capacity)
-            _head -= _capacity;
-    }
-    _written_size += strlen;
-    _remain_capacity -= strlen;
-    return strlen;
+    size_t write_size = min(data.size(), _capacity_size - _queue.size());
+    _written_size += write_size;
+    _queue.append(BufferList(move(string().assign(data.begin(),data.begin()+write_size))));
+    return write_size;
 }
 
 //! \param[in] len bytes will be copied from the output side of the buffer
 string ByteStream::peek_output(const size_t len) const {
-    size_t strlen = min(len, buffer_size());
-    string res = "";
-    size_t i = _tail;
-    while (strlen--){
-        res += _buffer[i++];
-        if (i >= _capacity)
-            i -= _capacity;
-    }
-    return res;
+    size_t pop_size = min(len, _queue.size());
+    string s = _queue.concatenate();
+    return string().assign(s.begin(),s.begin()+pop_size);
 }
 
 //! \param[in] len bytes will be removed from the output side of the buffer
-void ByteStream::pop_output(const size_t len) { 
-    // DUMMY_CODE(len);
-    size_t strlen = min(len,buffer_size()); 
-    _tail += strlen;
-    // tail ---------------- head
-    if (_tail >= _capacity)
-        _tail -= _capacity;
-    _read_size += strlen;
-    _remain_capacity += strlen;
+void ByteStream::pop_output(const size_t len) {
+    size_t pop_size = min(len, _queue.size());
+    _read_size += len;
+    _queue.remove_prefix(pop_size);
+    return ;
 }
 
 //! Read (i.e., copy and then pop) the next "len" bytes of the stream
 //! \param[in] len bytes will be popped and returned
 //! \returns a string
 std::string ByteStream::read(const size_t len) {
-    // DUMMY_CODE(len);
-    string res = peek_output(len);
-    pop_output(len);
-    
-    return res;
+    string data = this->peek_output(len);
+    this->pop_output(len);
+    return data;
 }
 
-void ByteStream::end_input() { this->_end_input = true; } // 由别人来调用
+void ByteStream::end_input() { _end_input = true; }
 
-bool ByteStream::input_ended() const { return this->_end_input; }
+bool ByteStream::input_ended() const { return _end_input; }
 
-size_t ByteStream::buffer_size() const { return this->_capacity - _remain_capacity; }
-    
-bool ByteStream::buffer_empty() const { return _remain_capacity == _capacity; }
+size_t ByteStream::buffer_size() const { return _queue.size(); }
 
-bool ByteStream::eof() const { return _end_input && _head == _tail; }
+bool ByteStream::buffer_empty() const { return _queue.size() == 0; }
 
-size_t ByteStream::bytes_written() const { return this->_written_size; }
+bool ByteStream::eof() const { return _end_input && (_queue.size() == 0); }
 
-size_t ByteStream::bytes_read() const { return this->_read_size; }
+size_t ByteStream::bytes_written() const { return _written_size; }
 
-size_t ByteStream::remaining_capacity() const { return this->_remain_capacity; }
+size_t ByteStream::bytes_read() const { return _read_size; }
+
+size_t ByteStream::remaining_capacity() const { return _capacity_size - _queue.size(); }

@@ -9,6 +9,7 @@
 #include <exception>
 #include <iostream>
 #include <vector>
+#include <sys/socket.h>
 
 using namespace std;
 

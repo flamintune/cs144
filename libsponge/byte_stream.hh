@@ -1,8 +1,9 @@
 #ifndef SPONGE_LIBSPONGE_BYTE_STREAM_HH
 #define SPONGE_LIBSPONGE_BYTE_STREAM_HH
-
+#include "buffer.hh"
+#include <deque>
 #include <string>
-#define Nbuffer 200000
+
 //! \brief An in-order byte stream.
 
 //! Bytes are written on the "input" side and read from the "output"
@@ -11,27 +12,25 @@
 class ByteStream {
   private:
     // Your code here -- add private members as necessary.
-    size_t _capacity;
-    size_t _head;
-    size_t _tail;
-    char _buffer[Nbuffer];
-    size_t _written_size;
-    size_t _read_size;
-    size_t _remain_capacity;
+
     // Hint: This doesn't need to be a sophisticated data structure at
     // all, but if any of your tests are taking longer than a second,
     // that's a sign that you probably want to keep exploring
     // different approaches.
-    bool _end_input{};
-    bool _empty{};
+    BufferList _queue{};
+    size_t _capacity_size;
+    size_t _written_size;
+    size_t _read_size;
+    bool _end_input;
     bool _error{};  //!< Flag indicating that the stream suffered an error.
+
   public:
     //! Construct a stream with room for `capacity` bytes.
     ByteStream(const size_t capacity);
 
     //! \name "Input" interface for the writer
     //!@{
-    // ? writer
+
     //! Write a string of bytes into the stream. Write as many
     //! as will fit, and return how many were written.
     //! \returns the number of bytes accepted into the stream
@@ -49,11 +48,11 @@ class ByteStream {
 
     //! \name "Output" interface for the reader
     //!@{
-    // ? reader
 
     //! Peek at next "len" bytes of the stream
     //! \returns a string
     std::string peek_output(const size_t len) const;
+
     //! Remove bytes from the buffer
     void pop_output(const size_t len);
 
