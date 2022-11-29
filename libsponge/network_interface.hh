@@ -7,7 +7,8 @@
 
 #include <optional>
 #include <queue>
-
+#include <map>
+#include <list>
 //! \brief A "network interface" that connects IP (the internet layer, or network layer)
 //! with Ethernet (the network access layer, or link layer).
 
@@ -40,6 +41,15 @@ class NetworkInterface {
     //! outbound queue of Ethernet frames that the NetworkInterface wants sent
     std::queue<EthernetFrame> _frames_out{};
 
+    //! mapping ip to ethernet next hop ip --> dst macaddr + ddl
+    std::map<uint32_t,std::pair<size_t,EthernetAddress>> _map{};
+    const size_t _arp_default_ddl = 30 * 1000;
+    //! not mapping dgram queue  next hop ip -- > time
+    std::map<uint32_t,size_t>_wait_arp{};
+    // 难怪不用map，因为可能会存在 重复的 数据包 但是 ip 是相同的
+    // 难怪要用用 map + list 因为 一个 ip 对应了 多个 internetgram
+    std::list<std::pair<Address,InternetDatagram>> _wait_internetgram{};
+    const size_t _arp_wait_time = 5 * 1000;
   public:
     //! \brief Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer) addresses
     NetworkInterface(const EthernetAddress &ethernet_address, const Address &ip_address);

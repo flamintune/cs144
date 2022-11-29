@@ -1,6 +1,6 @@
 #include "socket.hh"
 #include "util.hh"
-
+#include "tcp_sponge_socket.hh"
 #include <cstdlib>
 #include <iostream>
 
@@ -13,7 +13,7 @@ void get_URL(const string &host, const string &path) {
     // the computer whose name is in the "host" string,
     // then request the URL path given in the "path" string.
     const Address hostserver(host,"http"); // 初始化
-    TCPSocket client;
+    FullStackSocket client;
     client.connect(hostserver);
                   
     client.write("GET " + path + " HTTP/1.1\r\n");
