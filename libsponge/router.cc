@@ -48,14 +48,20 @@ void Router::route_one_datagram(InternetDatagram &dgram) {
         for (auto it= _router_table.equal_range(i);it.first != it.second;++  it.first){
             int bit = 32 - i;
             // 右移 32 bit 可能会存在一些问题
-if ((dst_ip >> bit) == (it.first->second.route_prefix >> bit)){
-                // cout << dst_ip << " " << it.first->second.route_prefix << " " << it.first->second.next_hop.value() << endl;
-                if (it.first->second.next_hop.has_value())
-                    _interfaces[it.first->second.interface_num].send_datagram(dgram,it.first->second.next_hop.value());
-                else
-                    _interfaces[it.first->second.interface_num].send_datagram(dgram,Address::from_ipv4_numeric(dst_ip));
-                
-                return ;
+        if (i == 0){
+            if (it.first->second.next_hop.has_value())
+                _interfaces[it.first->second.interface_num].send_datagram(dgram,it.first->second.next_hop.value());
+            else
+                _interfaces[it.first->second.interface_num].send_datagram(dgram,Address::from_ipv4_numeric(dst_ip));
+        }
+        else if ((dst_ip >> bit) == (it.first->second.route_prefix >> bit)){
+            // cout << dst_ip << " " << it.first->second.route_prefix << " " << it.first->second.next_hop.value() << endl;
+            if (it.first->second.next_hop.has_value())
+                _interfaces[it.first->second.interface_num].send_datagram(dgram,it.first->second.next_hop.value());
+            else
+                _interfaces[it.first->second.interface_num].send_datagram(dgram,Address::from_ipv4_numeric(dst_ip));
+            
+            return ;
             }
         }
     }
